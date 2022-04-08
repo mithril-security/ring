@@ -48,14 +48,12 @@ pub(crate) fn features() -> Features {
                     }
                     
                     extern crate sgx_oc;
-                    use sgx_oc::ocall::cpuid::cpuid_count;
+                    use sgx_oc::ocall::cpuid;
 
                     let [l1edx, l1ecx, l7ebx, l7ecx] = unsafe { &mut GFp_ia32cap_P };
-                    //let [_, _, cpuid_l1ecx, cpuid_l1edx] = cpuid_count(1, 0).unwrap();
-                    //let [_, cpuid_l7ebx, cpuid_l7ecx, _] = cpuid_count(7, 0).unwrap();
-                    unsafe{
-                        let res1 = cpuid_count(1, 0).unwrap();
-                        let res2 = cpuid_count(7, 0).unwrap();
+                    unsafe {
+                        let res1 = cpuid(1).unwrap();
+                        let res2 = cpuid(7).unwrap();
                         *l1edx = res1.edx as u32;
                         *l1ecx = res1.ecx as u32;
                         *l7ebx = res2.ebx as u32;
