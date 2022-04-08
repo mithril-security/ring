@@ -176,7 +176,7 @@ impl crate::sealed::Sealed for SystemRandom {}
 use self::sysrand::fill as fill_impl;
 
 #[cfg(all(
-    any(target_os = "android", target_os = "linux"),
+    any(target_os = "android", target_os = "linux"), not(target_vendor = "teaclave"),
     feature = "dev_urandom_fallback"
 ))]
 use self::sysrand_or_urandom::fill as fill_impl;
@@ -197,7 +197,7 @@ use self::darwin::fill as fill_impl;
 #[cfg(any(target_os = "fuchsia"))]
 use self::fuchsia::fill as fill_impl;
 
-#[cfg(target_env = "sgx")]
+#[cfg(target_vendor = "teaclave")]
 use self::rdrandom::fill as fill_impl;
 
 #[cfg(any(target_os = "android", target_os = "linux"))]
@@ -437,7 +437,7 @@ mod fuchsia {
     }
 }
 
-#[cfg(all(target_env = "sgx", target_feature = "rdrand"))]
+#[cfg(all(target_vendor = "teaclave"))]
 mod rdrandom {
     use crate::{bssl, error};
 

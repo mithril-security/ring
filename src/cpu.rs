@@ -40,26 +40,30 @@ pub(crate) fn features() -> Features {
         let () = INIT.call_once(|| {
             #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
             {
-                #[cfg(all(target_env = "sgx", target_vendor = "mesalock"))]
+                #[cfg(all(target_vendor = "teaclave"))]
                 {
                     // For SGX we initialize the cpuid through an OCALL with rsgx_cpuid
                     extern "C" {
                         static mut GFp_ia32cap_P: [u32; 4];
                     }
                     
-                    extern crate sgx_trts;
-                    use sgx_trts::cpuid::rsgx_cpuid;
+                    extern crate sgx_oc;
+                    use sgx_oc::ocall::cpuid::cpuid_count;
 
                     let [l1edx, l1ecx, l7ebx, l7ecx] = unsafe { &mut GFp_ia32cap_P };
-                    let [_, _, cpuid_l1ecx, cpuid_l1edx] = rsgx_cpuid(1).unwrap();
-                    let [_, cpuid_l7ebx, cpuid_l7ecx, _] = rsgx_cpuid(7).unwrap();
-                    *l1edx = cpuid_l1edx as u32;
-                    *l1ecx = cpuid_l1ecx as u32;
-                    *l7ebx = cpuid_l7ebx as u32;
-                    *l7ecx = cpuid_l7ecx as u32;
+                    //let [_, _, cpuid_l1ecx, cpuid_l1edx] = cpuid_count(1, 0).unwrap();
+                    //let [_, cpuid_l7ebx, cpuid_l7ecx, _] = cpuid_count(7, 0).unwrap();
+                    unsafe{
+                        let res1 = cpuid_count(1, 0).unwrap();
+                        let res2 = cpuid_count(7, 0).unwrap();
+                        *l1edx = res1.edx as u32;
+                        *l1ecx = res1.ecx as u32;
+                        *l7ebx = res2.ebx as u32;
+                        *l7ecx = res2.ecx as u32;
+                    }
                 }
 
-                #[cfg(not(all(target_env = "sgx", target_vendor = "mesalock")))]
+                #[cfg(not(all(target_vendor = "teaclave")))]
                 {
                     extern "C" {
                         fn GFp_cpuid_setup();

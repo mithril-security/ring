@@ -175,5 +175,5 @@ mod sealed {
 /// to time, it doesn't run automatically as part of a Continuous Testing
 /// setup. See the [GitHub issue](https://github.com/briansmith/ring/issues/778)
 /// for more information.
-#[cfg(target_env = "sgx")]
+#[cfg(target_vendor = "teaclave")]
 pub mod sgx {}

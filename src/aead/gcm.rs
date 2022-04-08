@@ -65,7 +65,7 @@ impl Key {
                 }
             }
 
-            #[cfg(not(any(target_env = "sgx", target_arch = "aarch64")))]
+            #[cfg(not(any(target_vendor = "teaclave", target_arch = "aarch64")))]
             Implementation::Fallback => {
                 h_table.Htable[0] = gcm_nohw::init(h);
             }
@@ -168,7 +168,7 @@ impl Context {
                 }
             }
 
-            #[cfg(not(any(target_env = "sgx", target_arch = "aarch64")))]
+            #[cfg(not(any(target_vendor = "teaclave", target_arch = "aarch64")))]
             Implementation::Fallback => {
                 gcm_nohw::ghash(xi, h_table.Htable[0], input);
             }
@@ -210,7 +210,7 @@ impl Context {
                 }
             }
 
-            #[cfg(not(any(target_env = "sgx", target_arch = "aarch64")))]
+            #[cfg(not(any(target_vendor = "teaclave", target_arch = "aarch64")))]
             Implementation::Fallback => {
                 gcm_nohw::gmult(xi, h_table.Htable[0]);
             }
@@ -228,7 +228,7 @@ impl Context {
     pub(super) fn is_avx2(&self, cpu_features: cpu::Features) -> bool {
         match detect_implementation(cpu_features) {
             Implementation::CLMUL => has_avx_movbe(self.cpu_features),
-            #[cfg(not(target_env = "sgx"))]
+            #[cfg(not(target_vendor = "teaclave"))]
             _ => false,
         }
     }
@@ -289,7 +289,7 @@ enum Implementation {
     #[cfg(any(target_arch = "aarch64", target_arch = "arm"))]
     NEON,
 
-    #[cfg(not(any(target_env = "sgx", target_arch = "aarch64")))]
+    #[cfg(not(any(target_vendor = "teaclave", target_arch = "aarch64")))]
     Fallback,
 }
 
@@ -331,12 +331,12 @@ fn detect_implementation(cpu_features: cpu::Features) -> Implementation {
         return Implementation::NEON;
     }
 
-    #[cfg(target_env = "sgx")]
+    #[cfg(target_vendor = "teaclave")]
     {
         panic!("No GCM implementation available!")
     }
 
-    #[cfg(not(any(target_env = "sgx", target_arch = "aarch64")))]
+    #[cfg(not(any(target_vendor = "teaclave", target_arch = "aarch64")))]
     Implementation::Fallback
 }
 
